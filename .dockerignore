@@ -1,0 +1,9 @@
+.git
+.gitignore
+Notebooks/
+data/
+__pycache__
+*.pyc
+.env
+.ipynb_checkpoints/
+.virtual_documents/

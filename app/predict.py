@@ -10,8 +10,8 @@ load_dotenv()
 
 # --- CONFIGURATION ---
 MODEL_PATH = 'Models/optimized_credit_risk_model.joblib'
-LOWER_THRESHOLD = 0.20  
-UPPER_THRESHOLD = 0.60  
+LOWER_THRESHOLD = 0.35  
+UPPER_THRESHOLD = 0.75  
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 MODEL_NAME = "gemini-2.5-flash"      
 
@@ -58,6 +58,42 @@ def predict_with_explanation(input_data):
     preprocessor = pipeline.named_steps['preprocessor']
     
     df = pd.DataFrame([input_data])
+
+    # Realistic median defaults for Lending Club features (prevents model bias from zeros)
+    NUMERIC_DEFAULTS = {
+        'loan_amnt': 12000, 'int_rate': 12.0, 'annual_inc': 65000,
+        'dti': 17.5, 'delinq_2yrs': 0, 'fico_range_low': 690, 'fico_range_high': 694,
+        'inq_last_6mths': 0, 'mths_since_last_delinq': 36, 'mths_since_last_record': 80,
+        'open_acc': 11, 'pub_rec': 0, 'revol_util': 50.0, 'total_acc': 25,
+        'collections_12_mths_ex_med': 0, 'mths_since_last_major_derog': 60,
+        'acc_now_delinq': 0, 'tot_coll_amt': 0, 'open_acc_6m': 1,
+        'open_act_il': 2, 'open_il_12m': 1, 'open_il_24m': 2,
+        'mths_since_rcnt_il': 8, 'total_bal_il': 18000, 'il_util': 65,
+        'open_rv_12m': 2, 'open_rv_24m': 4, 'max_bal_bc': 5000,
+        'all_util': 55, 'total_rev_hi_lim': 28000, 'inq_fi': 1,
+        'total_cu_tl': 5, 'inq_last_12m': 2, 'acc_open_past_24mths': 4,
+        'avg_cur_bal': 12000, 'chargeoff_within_12_mths': 0,
+        'delinq_amnt': 0, 'mo_sin_old_il_acct': 120, 'mo_sin_old_rev_tl_op': 150,
+        'mort_acc': 1, 'mths_since_recent_bc': 12, 'mths_since_recent_bc_dlq': 40,
+        'mths_since_recent_inq': 4, 'num_accts_ever_120_pd': 0,
+        'num_actv_rev_tl': 5, 'num_il_tl': 8, 'num_rev_accts': 14,
+        'num_tl_120dpd_2m': 0, 'num_tl_30dpd': 0, 'num_tl_90g_dpd_24m': 0,
+        'num_tl_op_past_12m': 2, 'pct_tl_nvr_dlq': 95.0,
+        'percent_bc_gt_75': 20, 'pub_rec_bankruptcies': 0,
+        'tax_liens': 0, 'tot_hi_cred_lim': 80000, 'total_bal_ex_mort': 35000,
+        'total_bc_limit': 15000, 'unemployment_rate': 4.5, 'fed_funds_rate': 2.0,
+        'revol_bal_to_inc': 0.3, 'emp_unemployment_risk': 0.05,
+        'credit_hist_age_mths': 180,
+    }
+
+    for col in pipeline.feature_names_in_:
+        if col not in df.columns:
+            num_features = preprocessor.transformers_[0][2].tolist()
+            if col in num_features:
+                df[col] = NUMERIC_DEFAULTS.get(col, 0)
+            else:
+                df[col] = 'Unknown'
+
     df = df[pipeline.feature_names_in_]
 
     prob_default = pipeline.predict_proba(df)[0][1]

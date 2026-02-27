@@ -1,100 +1,1160 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Credit Risk Decision Engine</title>
+  <meta name="description"
+    content="AI-powered credit risk assessment engine using machine learning and explainable AI to evaluate loan applications." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <style>
-    :root {
-      --bg: #f7fafc;
-      --card: #ffffff;
-      --text: #1a202c;
-      --border: #e2e8f0;
-      --button: #1f6feb;
-      --button-text: #ffffff;
-      --result-bg: #0f172a;
-      --result-text: #e2e8f0;
-    }
-    body {
+    *,
+    *::before,
+    *::after {
       margin: 0;
-      padding: 24px;
-      font-family: Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px;
-    }
-    textarea {
-      width: 100%;
-      min-height: 230px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: Consolas, monospace;
-      padding: 10px;
+      padding: 0;
       box-sizing: border-box;
     }
-    button {
-      margin-top: 10px;
-      border: 0;
-      border-radius: 6px;
-      background: var(--button);
-      color: var(--button-text);
-      padding: 10px 14px;
-      cursor: pointer;
+
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-card: #1a2035;
+      --bg-input: #0f1629;
+      --border: #1e2d4a;
+      --border-focus: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --glow-blue: rgba(59, 130, 246, 0.15);
+      --glow-cyan: rgba(6, 182, 212, 0.1);
+      --radius: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
     }
-    pre {
-      margin-top: 14px;
-      background: var(--result-bg);
-      color: var(--result-text);
+
+    body.light-theme {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f1f5f9;
+      --border: #e2e8f0;
+      --border-focus: #3b82f6;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --glow-blue: rgba(59, 130, 246, 0.1);
+      --glow-cyan: rgba(6, 182, 212, 0.05);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── Background Gradient Orbs ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    body.light-theme::before {
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -300px;
+      left: -200px;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    body.light-theme::after {
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+    }
+
+    /* ─── Header ─── */
+    .header {
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.95) 0%, transparent 100%);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    body.light-theme .header {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, transparent 100%);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .logo-text h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent-green);
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      }
+
+      50% {
+        opacity: 0.7;
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+      }
+    }
+
+    /* ─── Icon Button ─── */
+    .icon-btn {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
-      padding: 10px;
-      overflow-x: auto;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--glow-blue);
+    }
+
+    /* ─── Main Layout ─── */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .hero-section h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f1f5f9 0%, #3b82f6 50%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 900px) {
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      transition: border-color 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .card-header-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .card-header-icon.blue {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent-blue);
+    }
+
+    .card-header-icon.purple {
+      background: rgba(139, 92, 246, 0.12);
+      color: var(--accent-purple);
+    }
+
+    .card-header h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* ─── Form ─── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-group input,
+    .form-group select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px var(--glow-blue);
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-group select {
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .form-group select option {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* ─── Submit Button ─── */
+    .submit-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s ease;
+    }
+
+    .submit-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .submit-btn:hover {
+      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ─── Demo Button ─── */
+    .btn-demo {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0 20px;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-demo:hover {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--glow-blue);
+    }
+
+    /* ─── Loader ─── */
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .submit-btn.loading .spinner {
+      display: block;
+    }
+
+    .submit-btn.loading .btn-text {
+      display: none;
+    }
+
+    .submit-btn.loading .btn-loading-text {
+      display: inline;
+    }
+
+    .btn-loading-text {
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ─── Results Panel ─── */
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .result-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      gap: 16px;
+    }
+
+    .result-placeholder-icon {
+      font-size: 48px;
+      opacity: 0.4;
+    }
+
+    .result-placeholder p {
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    /* ─── Decision Badge ─── */
+    .decision-card {
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      animation: fadeSlideIn 0.5s ease;
+    }
+
+    .decision-card.accept {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.05));
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .decision-card.reject {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.05));
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .decision-card.review {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(139, 92, 246, 0.05));
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .decision-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .decision-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .decision-card.accept .decision-text {
+      color: var(--accent-green);
+    }
+
+    .decision-card.reject .decision-text {
+      color: var(--accent-red);
+    }
+
+    .decision-card.review .decision-text {
+      color: var(--accent-amber);
+    }
+
+    .decision-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* ─── Gauge ─── */
+    .gauge-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      background: rgba(15, 22, 41, 0.5);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      animation: fadeSlideIn 0.6s ease;
+    }
+
+    .gauge-container {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      flex-shrink: 0;
+    }
+
+    .gauge-svg {
+      width: 90px;
+      height: 90px;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 6;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.2s ease-out, stroke 0.5s ease;
+    }
+
+    .gauge-value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .gauge-info h4 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .gauge-info p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ─── Drivers ─── */
+    .drivers-section {
+      animation: fadeSlideIn 0.7s ease;
+    }
+
+    .drivers-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+
+    .driver-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(15, 22, 41, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      transition: border-color 0.2s ease;
+    }
+
+    .driver-item:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .driver-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .driver-icon.risk-up {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--accent-red);
+    }
+
+    .driver-icon.risk-down {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--accent-green);
+    }
+
+    .driver-text {
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .driver-impact {
+      margin-left: auto;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .driver-impact.up {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--accent-red);
+    }
+
+    .driver-impact.down {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-green);
+    }
+
+    /* ─── Narrative ─── */
+    .narrative-section {
+      padding: 18px;
+      background: rgba(139, 92, 246, 0.05);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius-lg);
+      animation: fadeSlideIn 0.8s ease;
+    }
+
+    .narrative-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-purple);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .narrative-text {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    /* ─── Error ─── */
+    .error-card {
+      padding: 20px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius-lg);
+      color: var(--accent-red);
+      font-size: 0.85rem;
+      animation: fadeSlideIn 0.5s ease;
+    }
+
+    /* ─── Animation ─── */
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+
+    .footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
     }
   </style>
 </head>
+
 <body>
-  <main class="container">
-    <h1>Credit Risk Decision Engine</h1>
-    <p>POST JSON to <code>/predict</code> using format <code>{"root": {...}}</code>.</p>
-    <textarea id="payload">{
-  "root": {
-    "loan_amnt": 10000,
-    "term": "36 months",
-    "int_rate": 12.5,
-    "purpose": "debt_consolidation",
-    "annual_inc": 75000
-  }
-}</textarea>
-    <br />
-    <button id="predict-btn" type="button">Predict</button>
-    <pre id="result">No response yet.</pre>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🛡️</div>
+        <div class="logo-text">
+          <h1>Credit Risk Engine</h1>
+          <span>AI-Powered Decision System</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <button id="theme-toggle" class="icon-btn" title="Toggle Theme">☀️</button>
+        <div class="status-badge" id="status-badge">Model Active</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <section class="hero-section">
+      <h2>Intelligent Risk Assessment</h2>
+      <p>Submit loan application data for instant credit risk evaluation powered by machine learning and explainable AI.
+      </p>
+    </section>
+
+    <div class="app-grid">
+      <!-- Left: Input Form -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon blue">📋</div>
+          <h3>Loan Application</h3>
+        </div>
+
+        <form id="predict-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="loan_amnt">Loan Amount ($)</label>
+              <input type="number" id="loan_amnt" placeholder="e.g. 10000" required />
+            </div>
+            <div class="form-group">
+              <label for="annual_inc">Annual Income ($)</label>
+              <input type="number" id="annual_inc" placeholder="e.g. 75000" required />
+            </div>
+            <div class="form-group">
+              <label for="int_rate">Interest Rate (%)</label>
+              <input type="number" id="int_rate" step="0.01" placeholder="e.g. 12.5" required />
+            </div>
+            <div class="form-group">
+              <label for="term">Loan Term (Months)</label>
+              <input type="number" id="term" placeholder="e.g. 36" min="1" max="360" required />
+            </div>
+            <div class="form-group">
+              <label for="purpose">Loan Purpose</label>
+              <select id="purpose">
+                <option value="debt_consolidation" selected>Debt Consolidation</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="home_improvement">Home Improvement</option>
+                <option value="major_purchase">Major Purchase</option>
+                <option value="small_business">Small Business</option>
+                <option value="car">Car</option>
+                <option value="medical">Medical</option>
+                <option value="moving">Moving</option>
+                <option value="vacation">Vacation</option>
+                <option value="house">House</option>
+                <option value="wedding">Wedding</option>
+                <option value="renewable_energy">Renewable Energy</option>
+                <option value="educational">Educational</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sub_grade">Sub Grade</label>
+              <select id="sub_grade">
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="A3">A3</option>
+                <option value="A4">A4</option>
+                <option value="A5">A5</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="B3" selected>B3</option>
+                <option value="B4">B4</option>
+                <option value="B5">B5</option>
+                <option value="C1">C1</option>
+                <option value="C2">C2</option>
+                <option value="C3">C3</option>
+                <option value="C4">C4</option>
+                <option value="C5">C5</option>
+                <option value="D1">D1</option>
+                <option value="D2">D2</option>
+                <option value="D3">D3</option>
+                <option value="D4">D4</option>
+                <option value="D5">D5</option>
+                <option value="E1">E1</option>
+                <option value="E2">E2</option>
+                <option value="E3">E3</option>
+                <option value="E4">E4</option>
+                <option value="E5">E5</option>
+                <option value="F1">F1</option>
+                <option value="F2">F2</option>
+                <option value="F3">F3</option>
+                <option value="F4">F4</option>
+                <option value="F5">F5</option>
+                <option value="G1">G1</option>
+                <option value="G2">G2</option>
+                <option value="G3">G3</option>
+                <option value="G4">G4</option>
+                <option value="G5">G5</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Credit Profile Section -->
+          <div style="margin: 20px 0 6px; padding-top: 16px; border-top: 1px solid var(--border);">
+            <span
+              style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">📊
+              Credit Profile</span>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="fico_range_low">FICO Score</label>
+              <input type="number" id="fico_range_low" placeholder="e.g. 700" min="300" max="850" required />
+            </div>
+            <div class="form-group">
+              <label for="dti">Debt-to-Income (%)</label>
+              <input type="number" id="dti" step="0.01" placeholder="e.g. 15.5" min="0" max="100" required />
+            </div>
+
+            <div class="form-group">
+              <label for="home_ownership">Home Ownership</label>
+              <select id="home_ownership">
+                <option value="RENT" selected>Rent</option>
+                <option value="OWN">Own</option>
+                <option value="MORTGAGE">Mortgage</option>
+                <option value="ANY">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="emp_length">Employment (Years)</label>
+              <input type="number" id="emp_length" placeholder="e.g. 5" min="0" max="50" required />
+            </div>
+            <div class="form-group">
+              <label for="verification_status">Income Verification</label>
+              <select id="verification_status">
+                <option value="Verified" selected>Verified</option>
+                <option value="Source Verified">Source Verified</option>
+                <option value="Not Verified">Not Verified</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="application_type">Application Type</label>
+              <select id="application_type">
+                <option value="Individual" selected>Individual</option>
+                <option value="Joint App">Joint Application</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="button" id="demo-btn" class="btn-demo">🎲 Fill Demo Data</button>
+            <button type="submit" class="submit-btn" id="submit-btn" style="flex: 1; margin-top: 0;">
+              <span class="btn-text">⚡ Analyze Risk</span>
+              <span class="btn-loading-text">Analyzing...</span>
+              <div class="spinner"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right: Results -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon purple">📊</div>
+          <h3>Assessment Results</h3>
+        </div>
+
+        <div class="results-panel" id="results-panel">
+          <div class="result-placeholder" id="placeholder">
+            <div class="result-placeholder-icon">🔍</div>
+            <p>Submit a loan application to receive<br />an AI-powered risk assessment.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <script>
-    const btn = document.getElementById("predict-btn");
-    const payload = document.getElementById("payload");
-    const result = document.getElementById("result");
+  <!-- Footer -->
+  <footer class="footer">
+    Credit Risk Decision Engine &middot; Powered by Machine Learning &amp; Gemini AI &middot;
+    <a href="/docs" target="_blank">API Documentation</a>
+  </footer>
 
-    btn.addEventListener("click", async () => {
+  <script>
+    const form = document.getElementById('predict-form');
+    const btn = document.getElementById('submit-btn');
+    const resultsPanel = document.getElementById('results-panel');
+    const placeholder = document.getElementById('placeholder');
+
+    // Check model status on load
+    fetch('/status')
+      .then(r => r.json())
+      .then(d => {
+        const badge = document.getElementById('status-badge');
+        if (d.status === 'ok') {
+          badge.textContent = 'Model Active';
+          badge.style.background = 'rgba(16,185,129,0.1)';
+          badge.style.borderColor = 'rgba(16,185,129,0.2)';
+          badge.style.color = '#10b981';
+        } else {
+          badge.textContent = 'Model Error';
+          badge.style.background = 'rgba(239,68,68,0.1)';
+          badge.style.borderColor = 'rgba(239,68,68,0.2)';
+          badge.style.color = '#ef4444';
+        }
+      })
+      .catch(() => { });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const val = id => document.getElementById(id).value;
+      const num = id => parseFloat(val(id));
+      const ficoScore = num('fico_range_low');
+      const payload = {
+        root: {
+          loan_amnt: num('loan_amnt'),
+          term: val('term') + ' months',
+          int_rate: num('int_rate'),
+          purpose: val('purpose'),
+          annual_inc: num('annual_inc'),
+          sub_grade: val('sub_grade'),
+          home_ownership: val('home_ownership'),
+          verification_status: val('verification_status'),
+          dti: num('dti'),
+          fico_range_low: ficoScore,
+          fico_range_high: ficoScore + 4,
+          application_type: val('application_type'),
+          emp_length: val('emp_length') + ' years',
+        }
+      };
+
       try {
-        const body = JSON.parse(payload.value);
-        const res = await fetch("/predict", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
         });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: 'Unknown error' }));
+          throw new Error(errData.detail || `Server error (${res.status})`);
+        }
+
         const data = await res.json();
-        result.textContent = JSON.stringify(data, null, 2);
+        renderResults(data);
       } catch (err) {
-        result.textContent = String(err);
+        console.error('Prediction error:', err);
+        renderError(err.message);
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
       }
     });
+
+    // Theme Toggle Logic
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      themeBtn.innerHTML = isLight ? '🌙' : '☀️';
+    });
+
+    // Demo Data Logic
+    const demoBtn = document.getElementById('demo-btn');
+    demoBtn.addEventListener('click', () => {
+      document.getElementById('loan_amnt').value = 10000;
+      document.getElementById('annual_inc').value = 75000;
+      document.getElementById('int_rate').value = 12.5;
+      document.getElementById('term').value = 36;
+      document.getElementById('purpose').value = 'debt_consolidation';
+      document.getElementById('sub_grade').value = 'B3'; // Added this line
+      document.getElementById('fico_range_low').value = 700;
+      document.getElementById('dti').value = 15.5;
+      document.getElementById('home_ownership').value = 'RENT';
+      document.getElementById('emp_length').value = 5;
+      document.getElementById('verification_status').value = 'Verified';
+      document.getElementById('application_type').value = 'Individual';
+    });
+
+    function renderResults(data) {
+      const pd = data.probability_of_default;
+      const decision = data.decision;
+      const drivers = data.top_drivers || [];
+      const narrative = data.narrative || '';
+
+      let decClass = 'review';
+      let decIcon = '⚠️';
+      if (decision === 'AUTOMATIC ACCEPT') { decClass = 'accept'; decIcon = '✅'; }
+      else if (decision === 'AUTOMATIC REJECT') { decClass = 'reject'; decIcon = '❌'; }
+
+      const pdPercent = (pd * 100).toFixed(2);
+      const circumference = 2 * Math.PI * 36;
+      const offset = circumference - (pd * circumference);
+
+      let gaugeColor = '#10b981';
+      if (pd > 0.6) gaugeColor = '#ef4444';
+      else if (pd > 0.2) gaugeColor = '#f59e0b';
+
+      let html = '';
+
+      // Decision card
+      html += `
+        <div class="decision-card ${decClass}">
+          <div class="decision-label">Assessment Decision</div>
+          <div class="decision-text">${decIcon} ${decision}</div>
+        </div>
+      `;
+
+      // Gauge
+      html += `
+        <div class="gauge-section">
+          <div class="gauge-container">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <circle class="gauge-bg" cx="40" cy="40" r="36" />
+              <circle class="gauge-fill" cx="40" cy="40" r="36"
+                stroke="${gaugeColor}"
+                stroke-dasharray="${circumference}"
+                stroke-dashoffset="${offset}" />
+            </svg>
+            <div class="gauge-value" style="color:${gaugeColor}">${pdPercent}%</div>
+          </div>
+          <div class="gauge-info">
+            <h4>Probability of Default</h4>
+            <p>
+              ${pd < 0.2 ? 'Low risk — within acceptable thresholds.' :
+          pd > 0.6 ? 'High risk — exceeds tolerance limits.' :
+            'Moderate risk — requires manual review.'}
+            </p>
+          </div>
+        </div>
+      `;
+
+      // Drivers
+      if (drivers.length > 0) {
+        html += `<div class="drivers-section"><div class="drivers-title">🎯 Key Risk Drivers</div>`;
+        drivers.forEach(d => {
+          const isUp = d.includes('Increased Risk');
+          const iconClass = isUp ? 'risk-up' : 'risk-down';
+          const impactClass = isUp ? 'up' : 'down';
+          const impactLabel = isUp ? '▲ Risk' : '▼ Risk';
+          const icon = isUp ? '📈' : '📉';
+          // Parse out the label (everything before the last parenthetical)
+          const label = d.replace(/\s*\((?:Increased|Decreased) Risk\)\s*$/, '');
+
+          html += `
+            <div class="driver-item">
+              <div class="driver-icon ${iconClass}">${icon}</div>
+              <span class="driver-text">${label}</span>
+              <span class="driver-impact ${impactClass}">${impactLabel}</span>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      // Narrative
+      if (narrative) {
+        html += `
+          <div class="narrative-section">
+            <div class="narrative-label">🤖 AI Executive Summary</div>
+            <div class="narrative-text">${narrative}</div>
+          </div>
+        `;
+      }
+
+      resultsPanel.innerHTML = html;
+    }
+
+    function renderError(msg) {
+      resultsPanel.innerHTML = `
+        <div class="error-card">
+          <strong>⚠️ Assessment Failed</strong><br/>
+          <span style="opacity:0.8">${msg}</span>
+        </div>
+      `;
+    }
   </script>
+
 </body>
+
 </html>

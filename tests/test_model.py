@@ -4,6 +4,7 @@ import pandas as pd
 import os
 
 MODEL_PATH = "Models/optimized_credit_risk_model.joblib"
+SAMPLE_DATA_PATH = "tests/test_sample.csv"
 
 @pytest.fixture
 def model():
@@ -12,14 +13,17 @@ def model():
 
 def test_model_prediction_output(model):
     # Creating dummy data with the exact columns your model expects
-    dummy_data = pd.DataFrame([{
-        "age": 35, 
-        "income": 65000, 
-        "loan_amount": 10000, 
-        "credit_history_length": 5
-    }])
+    assert os.path.exists(SAMPLE_DATA_PATH), "Test sample data not found!"
+    sample_data = pd.read_csv(SAMPLE_DATA_PATH)
+    #dummy_data = pd.DataFrame([{
+     #   "age": 35, 
+      #  "income": 65000, 
+       # "loan_amount": 10000, 
+       # "credit_history_length": 5
+    # }])
+    single_row = sample_data.iloc[[0]]
     
-    predictions = model.predict(dummy_data)
+    predictions = model.predict(single_row)
     
     # Checking that a prediction was made
     assert len(predictions) == 1

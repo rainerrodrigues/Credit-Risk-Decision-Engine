@@ -6,7 +6,7 @@ import os
 MODEL_PATH = "Models/optimized_credit_risk_model.joblib"
 
 @pytest.fixture
-dev model():
+def model():
     assert os.path.exists(MODEL_PATH), "Model path not found!"
     return joblib.load(MODEL_PATH)
 

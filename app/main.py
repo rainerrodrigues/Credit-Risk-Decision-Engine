@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator 
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
@@ -14,6 +15,8 @@ except ImportError:
     from predict import MODEL_PATH, predict_with_explanation
 
 app = FastAPI(title="Credit Risk Decision Engine API")
+instrumentator = Instrumentator().instrument(app)
+instrumentator.expose(app)
 
 
 class PredictRequest(BaseModel):

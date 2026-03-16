@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # FastAPI App (built from the Dockerfile)
+  api:
+    build: .  # This tells Compose to look for the Dockerfile in the current directory
+    ports:
+      - "8000:8000"
+    # Optional: If FastAPI app needs environment variables, add them here
+    # environment:
+    #   - MODEL_PATH=/app/models/credit_model.pkl
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - api # Wait for the API to start first
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
